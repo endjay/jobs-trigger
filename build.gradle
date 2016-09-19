@@ -1,0 +1,47 @@
+group 'org.websitezombie'
+version '1.0'
+
+apply plugin: 'java'
+apply plugin: 'application'
+
+sourceCompatibility = 1.5
+
+
+def mainClassNameProject = 'org.websitezombie.jobs'
+def projName = "jobs"
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+}
+
+
+
+
+mainClassName = "org.websitezombie.jobs"
+task jobsStart(type: CreateStartScripts) {
+    mainClassName = mainClassNameProject
+    applicationName = projName
+    outputDir = new File(project.buildDir, 'tmp')
+    classpath = jar.outputs.files + project.configurations.runtime
+}
+
+applicationDistribution.into('bin') {
+    from(jobsStart)
+    fileMode = 0755
+}
+
+jar {
+    from {
+        (configurations.runtime).collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+    manifest {
+        attributes 'Main-Class': mainClassNameProject
+    }
+}
